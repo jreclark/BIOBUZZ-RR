@@ -67,7 +67,7 @@ import java.util.List;
  */
 
 @TeleOp(name="TEST", group="TEST")
-@Disabled
+//@Disabled
 public class TEST_OpMode extends LinearOpMode {
 
     enum PIDFVals {
