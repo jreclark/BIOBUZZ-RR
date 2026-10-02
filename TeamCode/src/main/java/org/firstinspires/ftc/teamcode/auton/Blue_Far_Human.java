@@ -44,6 +44,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
@@ -70,7 +71,7 @@ import java.util.List;
  */
 
 @Autonomous(name = "Blue_Far_Human", group = "Comp")
-//@Disabled
+@Disabled
 public class Blue_Far_Human extends LinearOpMode {
 
     enum PIDFVals {

@@ -45,6 +45,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.actions.AlignSpindexer;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
+import org.firstinspires.ftc.teamcode.actions.ShootAction;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 import org.firstinspires.ftc.teamcode.classes.MatchInfo;
@@ -84,7 +85,7 @@ public class BIOBUZZ_Drive extends LinearOpMode {
         boolean fieldRel = false;
         boolean shooting = false;
 
-//        ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
+        ShootAction shootAction = new ShootAction(m_robot.shooter);
 
 //
 //        PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
@@ -101,7 +102,7 @@ public class BIOBUZZ_Drive extends LinearOpMode {
 ////        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
         ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.right_bumper);
         ButtonState shootAll = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
-//        ButtonState shootPattern = new ButtonState(gamepad2, ButtonState.Button.left_trigger);
+        ButtonState motorTest = new ButtonState(gamepad2, ButtonState.Button.left_trigger);
 //        ButtonState shootGreen = new ButtonState(gamepad2, ButtonState.Button.left_stick_button);
 //        ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
 //        ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
@@ -159,6 +160,9 @@ public class BIOBUZZ_Drive extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             telemetry.addData("Alliance Color: ", MatchInfo.allianceColor.toString());
+//            telemetry.addData("Flywheel: ", m_robot.shooter.getSpeed());
+
+            m_robot.shooter.updateController();
 
 
 
@@ -191,7 +195,7 @@ public class BIOBUZZ_Drive extends LinearOpMode {
             }
 
 
-            m_robot.shooter.setupShooter();
+//            m_robot.shooter.setupShooter();
 
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
@@ -225,18 +229,25 @@ public class BIOBUZZ_Drive extends LinearOpMode {
             if(spinUp.newPress()){
                 m_robot.shooter.spinUp(shotRPM);
             } else if (spinUp.newRelease()){
-                if(!shooting){
+                {
                     m_robot.shooter.idle();
                 }
             }
 
             if(shootAll.newPress()){
-                m_robot.shooter.shoot();
-                shooting = true;
+                shootAction.clearCancel();
+                m_robot.shooter.setNotIdle();
+                m_robot.shooter.setupShooter(shotRPM);
+                runningActions.add(shootAction);
             } else if (shootAll.newRelease()){
-                m_robot.shooter.unshoot();
-                shooting = false;
+                shootAction.cancel();
             }
+
+//            if(motorTest.newPress()){
+//                m_robot.shooter.motorTest(0.5);
+//            } else if (motorTest.newRelease()){
+//                m_robot.shooter.motorTest(0);
+//            }
 
             // update running actions
             List<Action> newActions = new ArrayList<>();
@@ -249,6 +260,8 @@ public class BIOBUZZ_Drive extends LinearOpMode {
             runningActions = newActions;
 
             dash.sendTelemetryPacket(packet);
+
+//            telemetry.addData("currentSpeed: ", m_robot.shooter.getSpeed());
 
             telemetry.update();
 

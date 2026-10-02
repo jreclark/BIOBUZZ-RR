@@ -27,10 +27,10 @@ public class Shooter_BIOBUZZ {
     PIDFCoefficients pidfCoefficients;
 
     //PIDEx Setup
-    public static double Kp = 0.003;
+    public static double Kp = 0.003;//0.003
     public static double Ki = 0;
-    public static double Kd = 0.0002;
-    public static double Kv = 0.00043; //1.1;
+    public static double Kd = 0.0002;//0.0002
+    public static double Kv = 0.0004; //1.1;
     public static double Ka = 0; //0.2;
     public static double Ks = 0; //0.001;
     public static double targetAccelTime = 0.5; //seconds
@@ -48,7 +48,7 @@ public class Shooter_BIOBUZZ {
 
 
     public static final int ticksPerRev = 28;
-    public int targetRPM = 0;
+    public int targetRPM = 500;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
     public int idleSpeed = 1000; // rpm
@@ -60,7 +60,7 @@ public class Shooter_BIOBUZZ {
         this.telemetry = telemetry;
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 //        pidfCoefficients =  flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -97,9 +97,10 @@ public class Shooter_BIOBUZZ {
 
         telemetry.addData("currentSpeed: ", currentSpeed);
         telemetry.addData("targetSpeed: ", targetSpeed);
+        telemetry.addData("targetRPM: ", targetRPM);
 //        telemetry.addData("targetAccel: ", targetAccel);
-//        telemetry.addData("pidOutput: ", pidOutput);
-//        telemetry.addData("ffoutput: ", ffOutput);
+        telemetry.addData("pidOutput: ", pidOutput);
+        telemetry.addData("ffoutput: ", ffOutput);
     }
     public Action updateFlywheel() {
         return new Action() {
@@ -139,8 +140,10 @@ public class Shooter_BIOBUZZ {
     public void spinUp(int target) {
         if (shooterIdle){
             setTargetSpeed(idleSpeed);
+            enable();
         } else {
             setTargetSpeed(target);
+            enable();
         }
         enable();
     }
@@ -190,12 +193,16 @@ public class Shooter_BIOBUZZ {
         motorFFController = new BasicFeedforward(ffCoeff);
     }
 
-    public void setupShooter(){
-        setTargetSpeed(2700);
-    }
+//    public void setupShooter(){
+//        setTargetSpeed(2700);
+//    }
 
     public void setupShooter(int rpm){
         setTargetSpeed(rpm);
+    }
+
+    public void motorTest(double pwr){
+        flywheel.setPower(pwr);
     }
 
 

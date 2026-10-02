@@ -34,7 +34,7 @@ public class Shooter {
     public static double Kp = 0.003;
     public static double Ki = 0;
     public static double Kd = 0.0002;
-    public static double Kv = 0.00043; //1.1;
+    public static double Kv = 0.00043; //0.00043
     public static double Ka = 0; //0.2;
     public static double Ks = 0; //0.001;
     public static double targetAccelTime = 0.5; //seconds
@@ -141,8 +141,8 @@ public class Shooter {
         telemetry.addData("currentSpeed: ", currentSpeed);
         telemetry.addData("targetSpeed: ", targetSpeed);
 //        telemetry.addData("targetAccel: ", targetAccel);
-//        telemetry.addData("pidOutput: ", pidOutput);
-//        telemetry.addData("ffoutput: ", ffOutput);
+        telemetry.addData("pidOutput: ", pidOutput);
+        telemetry.addData("ffoutput: ", ffOutput);
     }
     public Action updateFlywheel() {
         return new Action() {

@@ -21,8 +21,8 @@ public final class PinpointLocalizer implements Localizer {
     public static class Params {
 //        public double parYTicks = -89.15; //* goBILDA_4_BAR_POD; // y position of the parallel encoder (in tick units) -92.075
 //        public double perpXTicks = -166.311;// * goBILDA_4_BAR_POD; // x position of the perpendicular encoder (in tick units) -166.6875
-        public double parYTicks = -1920.6483740962638; //* goBILDA_4_BAR_POD; // y position of the parallel encoder (in tick units) -92.075
-        public double perpXTicks = -3852.248031959847;// * goBILDA_4_BAR_POD; // x position of the perpendicular encoder (in tick units) -166.6875
+        public double parYTicks = 1516; //* goBILDA_4_BAR_POD; // y position of the parallel encoder (in tick units) -92.075
+        public double perpXTicks = -3442;// * goBILDA_4_BAR_POD; // x position of the perpendicular encoder (in tick units) -166.6875
     }
 
     public static Params PARAMS = new Params();

@@ -44,9 +44,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Robot_BIOBUZZ;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
+import org.firstinspires.ftc.teamcode.actions.ShootAction;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
+import org.firstinspires.ftc.teamcode.backups.ShootAll;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,57 +97,24 @@ public class Base_Auto extends LinearOpMode {
         List<Action> runningActions = new ArrayList<>();
 
         TelemetryPacket packet = new TelemetryPacket();
-        Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0, 0, 0));
+        Robot_BIOBUZZ m_robot = new Robot_BIOBUZZ(hardwareMap, telemetry, new Pose2d(0, 0, 0));
 
         telemetry.setMsTransmissionInterval(11);
-        m_robot.limelight.pipelineSwitch(0);
-        m_robot.limelight.start();
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
-        ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
-        ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
+        ShootAction shootAction = new ShootAction(m_robot.shooter);
 
         int tagID = 0;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        LLResult llResult;
 
         // Wait for the game to start (driver presses START)
         m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
-        m_robot.spindexer.initSpindexerforAuton();
 
         while (!isStarted() && !isStopRequested()) {
-            llResult = m_robot.limelight.getLatestResult();
-            if (llResult != null) {
-                if (llResult.isValid()) {
-                    // Access AprilTag results
-                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                        telemetry.update();
-                    }
-                }
-            }
-        }
 
-        llResult = m_robot.limelight.getLatestResult();
-        if (llResult != null) {
-            if (llResult.isValid()) {
-                // Access AprilTag results
-                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
-                        tagID = fr.getFiducialId();
-                    }
-                }
-            }
         }
-
-        shootAction.setShotOrder(tagID - 21);
-        shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
 
         shootAction.preview(packet.fieldOverlay());
         while (shootAction.run(packet)) {

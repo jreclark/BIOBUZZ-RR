@@ -34,24 +34,18 @@ import android.annotation.SuppressLint;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
-import org.firstinspires.ftc.teamcode.actions.ScanIntake;
-import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
-import org.firstinspires.ftc.teamcode.classes.MatchInfo;
+import org.firstinspires.ftc.teamcode.Robot_BIOBUZZ;
+import org.firstinspires.ftc.teamcode.actions.ShootAction;
+import org.firstinspires.ftc.teamcode.actions.ShootActionTimed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,9 +64,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Motion_Test", group = "Test")
-@Disabled
-public class Motion_Test extends LinearOpMode {
+@Autonomous(name = "Flower Shoot and Park", group = "Auto")
+//@Disabled
+public class Flower_Shoot_and_Park extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -99,63 +93,68 @@ public class Motion_Test extends LinearOpMode {
         List<Action> runningActions = new ArrayList<>();
 
         TelemetryPacket packet = new TelemetryPacket();
+        Robot_BIOBUZZ m_robot = new Robot_BIOBUZZ(hardwareMap, telemetry, new Pose2d(0, 0, 0));
+
+        telemetry.setMsTransmissionInterval(11);
+
+        ShootActionTimed shootAction = new ShootActionTimed(m_robot.shooter);
+
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         int tagID = 0;
-        int shooterRPM = 3250;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        LLResult llResult;
+        Pose2d initialPose = new Pose2d(0, -8, Math.toRadians(0));
 
-        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(180));
+        Pose2d shootPose = new Pose2d(4, -12, Math.toRadians(5));
 
-        Pose2d firstShot = new Pose2d(new Vector2d(0, 24), Math.toRadians(180));
+        Pose2d parkPose = new Pose2d(new Vector2d(10, -50), Math.toRadians(-90));
 
-        Pose2d oneByOne = new Pose2d(new Vector2d(-24, 24), Math.toRadians(180));
+        TrajectoryActionBuilder turnTraj = m_robot.drive.actionBuilder(initialPose)
+                .setTangent(0)
+                .splineToSplineHeading(shootPose, -90);
+
+        Action turnAction = turnTraj.build();
+
+        TrajectoryActionBuilder parkTraj = turnTraj.endTrajectory().fresh()
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(parkPose, Math.toRadians(-90));
+
+        Action parkAction = parkTraj.build();
 
 
-        Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
-
-
-        TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(180))
-                .splineTo(oneByOne.position,Math.toRadians(90));
-
-//        TrajectoryActionBuilder firstShotTraj =  m_robot.drive.actionBuilder(initialPose)
-//                .setTangent(Math.toRadians(180))
-//                .splineToConstantHeading(oneByOne.position,Math.toRadians(90));
-//
-//        TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-//                .setTangent(Math.toRadians(90))
-//                .splineTo(firstShot.position, Math.toRadians(90));
-
-        Action firstShotAction = firstShotTraj.build();
 
         // Wait for the game to start (driver presses START)
-        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.BLUE);
-        m_robot.initRobot();
-        m_robot.spindexer.initSpindexerforAuton();
+        m_robot.intake.stop();
 
-        waitForStart();
+        while (!isStarted() && !isStopRequested()) {}
 
-        Actions.runBlocking(firstShotAction);
+        timer.reset();
 
+        Actions.runBlocking(turnAction);
 
-//        m_robot.shooter.setTargetSpeed(shooterRPM);
-//        m_robot.shooter.updateController();
-//
-//        m_robot.spindexer.selectAShot(shootAction);
-//
-//        Actions.runBlocking(new RaceAction(
-//                shootThirdAction,
-//                m_robot.shooter.updateFlywheel()));
-//        Actions.runBlocking(shootAction);
-//
-//        Actions.runBlocking(finalPosAction);
+        shootAction.clearCancel();
+        m_robot.shooter.setNotIdle();
+        m_robot.shooter.spinUp(3400);
+        shootAction.setDuration(3);
+
+        while(timer.seconds()<6){
+            m_robot.shooter.updateController();
+        }
+
+        m_robot.intake.intakeArtifact();
+
+        Actions.runBlocking(shootAction);
+
+        Actions.runBlocking(parkAction);
+
+        m_robot.intake.stop();
 
     }
+
 
 
 }
